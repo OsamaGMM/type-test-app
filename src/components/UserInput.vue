@@ -1,7 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue';
 
-// Sample text for comparison
 const sampleText = "Your lorem ipsum dolor sit amet";
 // const splitSampleText = sampleText.split("")
 
@@ -12,9 +11,8 @@ const result = ref('');
 const wordsPerMinute = ref(null);
 
 function compareLetters(event) {
-  const latestInput = event.target.value.slice(-1); // Get the last character entered
+  const latestInput = event.target.value.slice(-1); 
 
-  // Perform your comparison logic here
   const currentIndex = userInput.value.length - 1;
   if (latestInput === sampleText[currentIndex]) {
     result.value = { text: 'Correct!', color: 'green' };
@@ -25,7 +23,6 @@ function compareLetters(event) {
 
 const formattedUserInput = ref('');
 
-// Watch for changes in userInput and update formattedUserInput
 watch(userInput, () => {
   formattedUserInput.value = highlightLetters();
 });
