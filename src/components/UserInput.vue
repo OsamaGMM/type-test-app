@@ -12,7 +12,7 @@ const isActive = (index) => {
 };
 
 const isActiveLetter = (wordIndex, letterIndex) => {
-      return isActive(wordIndex) && letterIndex === activeLettreIndex.value;
+    return isActive(wordIndex) && letterIndex === activeLettreIndex.value;
 };
 
 const activeWordValue = computed(() => {
@@ -27,26 +27,56 @@ const activeWordValue = computed(() => {
   }
 })
 
-watch(activeWordIndex, () => {
-  const activeWord = activeWordValue.value;
-  console.log("Active Word has changed:", activeWord.word, "Active Letter:", activeWord.activeLettre);
-  console.log("word", activeWordIndex.value);
-  activeLettreIndex.value = 0
+watch(activeWordIndex, (newIndex, oldIndex) => {
+  // Check if the change in activeWordIndex is due to a user moving to the next word
+  if (newIndex > oldIndex) {
+    // Set activeLettreIndex to 0 when moving to a new word
+    activeLettreIndex.value = 0;
+  }
 });
-watch(activeLettreIndex, () => {
- console.log("Active Letter:",activeLettreIndex.value);
-});
-
 
 const userInput = ref('');
+watch(userInput, () => {
+//  console.log("userInput",userInput.value);
+});
+
+
+watch(activeWordValue, () => {
+//  console.log("Active Letter:", activeWordValue.value.activeLettre);
+});
+
+watch(activeLettreIndex, () => {
+//  console.log("Active Letter is changing:", activeLettreIndex.value);
+});
+
+const handleKeyDown = (event) => {
+  if (event.key === 'Backspace') {
+    if (activeLettreIndex.value === 0 && activeWordIndex.value > 0) {
+      // Move to the previous word
+      activeWordIndex.value -= 1;
+
+      // Log the values for debugging
+      console.log('Active Word Index:', activeWordIndex.value);
+      console.log('Active Word Length:', splitSampleText[activeWordIndex.value].length);
+
+      // Set activeLettreIndex to the last index of the new word
+      activeLettreIndex.value = splitSampleText[activeWordIndex.value].length - 1;
+
+      // Log the updated value for activeLettreIndex
+      console.log('Updated Active Letter Index:', activeLettreIndex.value);
+    } else if (activeLettreIndex.value > 0) {
+      // Move to the previous letter within the same word
+      activeLettreIndex.value -= 1;
+    }
+  }
+};
+
 const result = ref('');
 
 function compareLetters(event) {
-  if (event.data === ' ') {
+  if (event.data === ' ' || event.data === null) {
     return;
   }
-
-  console.log(event.data);
   // Increment activeLettreIndex for other keys
   activeLettreIndex.value++;
 
@@ -85,14 +115,14 @@ function highlightLetters() {
 
   <!-- <input v-model="sampleText" id="user-input" type="text"> -->
 
-  <textarea v-model="userInput" @input="compareLetters" @keyup.space="activeWordIndex++" name="" id=""></textarea>
+  <textarea v-model="userInput" @input="compareLetters" @keyup.space="activeWordIndex++" @keydown="handleKeyDown"></textarea>
 
     <div class="sample-text">
       <div class="text-container" >
 
       <span v-for="(word, index) in splitSampleText" :key="index" :class="{'pop': isActive(index) }">
         <span v-if="isActive(index)">
-          <span v-for="(letter, letterIndex) in activeWordValue.lettres" :key="letterIndex" :class="{'active-letter': isActiveLetter(letterIndex) }">
+          <span v-for="(letter, letterIndex) in activeWordValue.lettres" :key="letterIndex" :class="{'active-letter': isActiveLetter(index, letterIndex) }">
             {{ letter }}
           </span>
         </span>
