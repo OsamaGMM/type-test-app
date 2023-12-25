@@ -2,7 +2,8 @@
 import { ref, watch,computed } from 'vue';
 
 const sampleText = `Vue js est un framework`;
-const splitSampleText = sampleText.split(" ")
+const spacer = '-';
+const splitSampleText = sampleText.split(' ').flatMap((word, index, array) => index === array.length - 1 ? [word] : [word, spacer]);
 
 const activeWordIndex = ref(0);
 const activeLettreIndex = ref(0);
@@ -18,6 +19,7 @@ const isActiveLetter = (wordIndex, letterIndex) => {
 const activeWordValue = computed(() => {
   // console.log("word is split", splitSampleText[activeWordIndex.value].split(""));
   const word = splitSampleText[activeWordIndex.value]
+  // console.log(word);
   const lettres = word.split("")
   const activeLettre = lettres[activeLettreIndex.value] 
   return {
@@ -37,16 +39,21 @@ watch(activeWordIndex, (newIndex, oldIndex) => {
 
 const userInput = ref('');
 watch(userInput, () => {
-//  console.log("userInput",userInput.value);
+//  console.log("userInput", userInput.value);
 });
 
 
 watch(activeWordValue, () => {
-//  console.log("Active Letter:", activeWordValue.value.activeLettre);
+  if (activeWordValue.value.activeLettre) {
+    console.log("still has letters", activeWordValue.value.word);
+  }else{
+    activeWordIndex.value += 1;
+    activeLettreIndex.value = 0; // Set activeLettreIndex to the beginning of the spacer word
+  }
 });
 
 watch(activeLettreIndex, () => {
-//  console.log("Active Letter is changing:", activeLettreIndex.value);
+ console.log("Active Letter is changing:", activeLettreIndex.value);
 });
 
 const handleKeyDown = (event) => {
@@ -54,16 +61,9 @@ const handleKeyDown = (event) => {
     if (activeLettreIndex.value === 0 && activeWordIndex.value > 0) {
       // Move to the previous word
       activeWordIndex.value -= 1;
-
-      // Log the values for debugging
-      console.log('Active Word Index:', activeWordIndex.value);
-      console.log('Active Word Length:', splitSampleText[activeWordIndex.value].length);
-
       // Set activeLettreIndex to the last index of the new word
       activeLettreIndex.value = splitSampleText[activeWordIndex.value].length - 1;
-
-      // Log the updated value for activeLettreIndex
-      console.log('Updated Active Letter Index:', activeLettreIndex.value);
+      console.log( activeLettreIndex.value);
     } else if (activeLettreIndex.value > 0) {
       // Move to the previous letter within the same word
       activeLettreIndex.value -= 1;
