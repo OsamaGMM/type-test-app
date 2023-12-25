@@ -45,7 +45,7 @@ watch(userInput, () => {
 
 watch(activeWordValue, () => {
   if (activeWordValue.value.activeLettre) {
-    console.log("still has letters", activeWordValue.value.word);
+    // console.log("still has letters", activeWordValue.value.word);
   }else{
     activeWordIndex.value += 1;
     activeLettreIndex.value = 0; // Set activeLettreIndex to the beginning of the spacer word
@@ -53,7 +53,7 @@ watch(activeWordValue, () => {
 });
 
 watch(activeLettreIndex, () => {
- console.log("Active Letter is changing:", activeLettreIndex.value);
+//  console.log("Active Letter is changing:", activeLettreIndex.value);
 });
 
 const handleKeyDown = (event) => {
@@ -69,26 +69,36 @@ const handleKeyDown = (event) => {
       activeLettreIndex.value -= 1;
     }
   }
+
+  if (event.key === ' ') {
+    activeWordIndex.value++
+    activeLettreIndex.value = 0; // Set activeLettreIndex to the beginning of the new word
+  }
 };
 
+
+
 const result = ref('');
+
 
 function compareLetters(event) {
   if (event.data === ' ' || event.data === null) {
     return;
   }
-  // Increment activeLettreIndex for other keys
-  activeLettreIndex.value++;
-
   const latestInput = event.target.value.slice(-1); 
-  const currentIndex = userInput.value.length - 1;
   // console.log("working " + latestInput);
 
-  if (latestInput === sampleText[currentIndex]) {
+  if (latestInput === activeWordValue.value.activeLettre) {
+    console.log("ok bonne lettre", activeWordValue.value.activeLettre);
     result.value = { text: 'Correct!', color: 'green' };
+    console.log( result.value);
   } else {
+    console.log("non mauvaise lettre", activeWordValue.value.activeLettre);
+
     result.value = { text: 'Incorrect.', color: 'red' };
   }
+
+  activeLettreIndex.value++;
 }
 
 const formattedUserInput = ref('');
@@ -115,7 +125,7 @@ function highlightLetters() {
 
   <!-- <input v-model="sampleText" id="user-input" type="text"> -->
 
-  <textarea v-model="userInput" @input="compareLetters" @keyup.space="activeWordIndex++" @keydown="handleKeyDown"></textarea>
+  <textarea v-model="userInput" @input="compareLetters" @keydown="handleKeyDown"></textarea>
 
     <div class="sample-text">
       <div class="text-container" >
