@@ -12,9 +12,11 @@ const isActive = (index) => {
   return index === activeWordIndex.value;
 };
 
+
 const isActiveLetter = (wordIndex, letterIndex) => {
     return isActive(wordIndex) && letterIndex === activeLettreIndex.value;
 };
+
 
 const activeWordValue = computed(() => {
   // console.log("word is split", splitSampleText[activeWordIndex.value].split(""));
@@ -47,13 +49,14 @@ watch(activeWordValue, () => {
   if (activeWordValue.value.activeLettre) {
     // console.log("still has letters", activeWordValue.value.word);
   }else{
+    endOfWord()
     activeWordIndex.value += 1;
     activeLettreIndex.value = 0; // Set activeLettreIndex to the beginning of the spacer word
   }
 });
 
 watch(activeLettreIndex, () => {
-//  console.log("Active Letter is changing:", activeLettreIndex.value);
+ console.log("Active Letter is changing:", activeLettreIndex.value);
 });
 
 const handleKeyDown = (event) => {
@@ -76,47 +79,48 @@ const handleKeyDown = (event) => {
   }
 };
 
-
-
-const result = ref('');
+const result = ref({ text: '', class: '' });
+console.log(result.value);
 
 
 function compareLetters(event) {
   if (event.data === ' ' || event.data === null) {
     return;
   }
+
   const latestInput = event.target.value.slice(-1); 
-  // console.log("working " + latestInput);
+  const activeLetter = activeWordValue.value.activeLettre; // Assuming this property name is correct
 
-  if (latestInput === activeWordValue.value.activeLettre) {
-    console.log("ok bonne lettre", activeWordValue.value.activeLettre);
-    result.value = { text: 'Correct!', color: 'green' };
-    console.log( result.value);
+  const isCorrect = latestInput === activeLetter;
+
+ if (isCorrect) {
+    result.value = { text: 'Correct!', class: 'correct' };
+    console.log(result.value);
   } else {
-    console.log("non mauvaise lettre", activeWordValue.value.activeLettre);
-
-    result.value = { text: 'Incorrect.', color: 'red' };
+    result.value = { text: 'Incorrect.', class: 'incorrect' };
+    console.log(result.value);
   }
 
   activeLettreIndex.value++;
 }
 
-const formattedUserInput = ref('');
-watch(userInput, () => {
-  formattedUserInput.value = highlightLetters();
-});
 
-function highlightLetters() {
-  const formatted = [];
-  for (let i = 0; i < Math.min(userInput.value.length, sampleText.length); i++) {
-    if (userInput.value[i] === sampleText[i]) {
-      formatted.push(`<span style="color: green">${userInput.value[i]}</span>`);
-    } else {
-      formatted.push(`<span style="color: red;">${userInput.value[i]}</span>`);
-    }
+function endOfWord() {
+  const userInputValue = userInput.value;
+  const activeWord = activeWordValue.value.word;
+
+  console.log("User Input:", userInputValue);
+  console.log("Active Word:", activeWord);
+
+  if (userInputValue === activeWord) {
+    // Save the word or perform any other actions
+    console.log("Word Matched! Saving the word:", userInputValue);
+    // Your saving logic goes here
+  }else{
+    console.log("error in the word:", userInputValue);
   }
-  return formatted.join('');
 }
+
 
 </script>
 
@@ -132,13 +136,18 @@ function highlightLetters() {
 
       <span v-for="(word, index) in splitSampleText" :key="index" :class="{'pop': isActive(index) }">
         <span v-if="isActive(index)">
-          <span v-for="(letter, letterIndex) in activeWordValue.lettres" :key="letterIndex" :class="{'active-letter': isActiveLetter(index, letterIndex) }">
+          <span v-for="(letter, letterIndex) in activeWordValue.lettres" :key="letterIndex"
+           :class="{
+            'active-letter': isActiveLetter(index, letterIndex),
+          }"
+           >
             {{ letter }}
           </span>
         </span>
         <span v-else>
           {{ word }}
         </span>
+
       </span>
 
       <h1>{{ activeWordValue.activeLettre }}</h1>
@@ -168,7 +177,24 @@ function highlightLetters() {
 }
 
 .active-letter {
-  color: red; 
+  color: blue; 
+  position: relative;
+}
+
+.active-letter::after {
+  content: "_";
+  position: absolute;
+  left: 50%;
+  top: 5px;
+  transform: translate(-50%, 0);
+}
+
+.correct {
+  color: green;
+}
+
+.incorrect {
+  color: red;
 }
 
 html{
@@ -192,6 +218,7 @@ html{
 .text-container {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
 }
 
